@@ -35,13 +35,15 @@ public:
         >
     > key_to_value_type;
 
+    typedef std::function<value_type(const key_type&)> function_type;
+
     // Constuctor specifies the cached function and 
     // the maximum number of records to be stored 
     lru_cache_using_std(
-        value_type(*f)(const key_type&),
+        function_type f,
         size_t c
     )
-        :_fn(f)
+        : _fn(f)
         , _capacity(c)
     {
         assert(_capacity != 0);
@@ -139,7 +141,7 @@ private:
     }
 
     // The function to be cached 
-    value_type(*_fn)(const key_type&);
+    const function_type _fn;
 
     // Maximum number of key-value pairs to be retained 
     const size_t _capacity;
