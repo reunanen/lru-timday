@@ -18,7 +18,8 @@
 #define _lru_cache_using_std_ 
 
 #include <cassert> 
-#include <list> 
+#include <list>
+#include <functional> // for std::function
 
 // Class providing fixed-size (by number of records) 
 // LRU-replacement cache of a function with signature 
