@@ -113,6 +113,29 @@ public:
         }
     }
 
+    // Using the functions has() and set(), it is possible to
+    // build a thread-safe cache without having to lock the
+    // whole cache in order to evaluate (and keep) a new value.
+
+    // Find out if the cache already has some value
+    bool has(const key_type& k) const {
+        return _key_to_value.find(k) != _key_to_value.end();
+    }
+
+    // Set a key-value pair that may be missing in the cache
+    void set(const key_type& k, const value_type& v) {
+        const auto i = _key_to_value.find(k);
+        if (i == _key_to_value.end()) {
+            insert(k, v);
+        }
+        else {
+            // If we already have a value, it would be logical
+            // to assume that it is equal to whatever we tried
+            // to set
+            assert(i->second == v);
+        }
+    }
+
 private:
 
     // Record a fresh key-value pair in the cache 
