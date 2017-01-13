@@ -132,7 +132,14 @@ public:
             // If we already have a value, it would be logical
             // to assume that it is equal to whatever we tried
             // to set
-            assert(i->second == v);
+
+            //assert(i->second == v);
+
+            // However, the above assertion has been commented
+            // out for now, because we don't want to require
+            // that the value type has an equality operator.
+            // TODO: Use SFINAE to enable the assertion when
+            // the value type does have an equality operator.
         }
     }
 
