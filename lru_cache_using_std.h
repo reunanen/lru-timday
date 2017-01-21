@@ -54,7 +54,7 @@ public:
 
     typedef std::function<value_type(const key_type&)> function_type;
 
-    // Constuctor specifies the cached function and 
+    // Constructor specifies the cached function and 
     // the maximum number of records to be stored 
     lru_cache_using_std(
         function_type f,
