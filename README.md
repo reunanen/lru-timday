@@ -1,3 +1,5 @@
 # LRU cache implementation in C++ by Tim Day
 
-Taken from http://timday.bitbucket.org/lru.html
+#### + shared extension by Juha Reunanen
+
+`lru_cache_using_std.h` taken from http://timday.bitbucket.org/lru.html
