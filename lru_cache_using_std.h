@@ -81,6 +81,21 @@ public:
             const value_type v = _fn(k);
             insert(k, v);
 
+#ifdef _DEBUG
+            // Update evaluation counters
+            // - do it like this instead of a simple one-liner
+            //   ("++_eval_counters[k]"), because now it's
+            //   convenient to add a breakpoint for unexpected
+            //   cache misses (counter increased beyond 1)
+            const auto i = _eval_counters.find(k);
+            if (i != _eval_counters.end()) {
+                ++i->second;
+            }
+            else {
+                _eval_counters[k] = 1;
+            }
+#endif // _DEBUG
+
             // Return the freshly computed value 
             return v;
 
@@ -198,6 +213,11 @@ private:
 
     // Key-to-value lookup 
     key_to_value_type _key_to_value;
+
+#ifdef _DEBUG
+    // Evaluation counters
+    MAP<key_type, size_t> _eval_counters;
+#endif // _DEBUG
 };
 
 #endif
