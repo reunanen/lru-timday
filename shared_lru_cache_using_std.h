@@ -20,6 +20,7 @@
 #include "lru_cache_using_std.h"
 #include <unordered_set>
 #include <mutex>
+#include <thread>
 
 // A thread-safe variant of lru_cache_using_std that
 // remains available for reading when the function is
