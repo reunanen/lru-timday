@@ -74,11 +74,23 @@ public:
             i->second.active_threads.insert(this_thread_id);
         }
 
+        const auto done = [&]() {
+            std::lock_guard<std::mutex> guard(_is_being_evaluated_mutex);
+            auto i = _is_being_evaluated.find(k);
+            assert(i->second.active_threads.find(this_thread_id) != i->second.active_threads.end());
+            i->second.active_threads.erase(this_thread_id);
+            if (i->second.active_threads.empty()) {
+                _is_being_evaluated.erase(i);
+            }
+        };
+
         std::lock_guard<std::mutex> evaluation_guard(*key_specific_mutex);
         {
             std::lock_guard<std::mutex> guard(_underlying_lru_cache_mutex);
             if (_underlying_lru_cache.has(k)) {
-                return _underlying_lru_cache.operator()(k);
+                const value_type v = _underlying_lru_cache.operator()(k);
+                done();
+                return v;
             }
         }
 
@@ -90,16 +102,7 @@ public:
             _underlying_lru_cache.set(k, v);
         }
 
-        {
-            std::lock_guard<std::mutex> guard(_is_being_evaluated_mutex);
-            auto i = _is_being_evaluated.find(k);
-            assert(i->second.active_threads.find(this_thread_id) != i->second.active_threads.end());
-            i->second.active_threads.erase(this_thread_id);
-            if (i->second.active_threads.empty()) {
-                _is_being_evaluated.erase(i);
-            }
-        }
-
+        done();
         return v;
     }
 
