@@ -54,7 +54,16 @@ public:
         {
             std::lock_guard<std::mutex> guard(_underlying_lru_cache_mutex);
             if (_underlying_lru_cache.has(k)) {
+                {
+                    std::lock_guard<std::mutex> guard(_hit_rate_mutex);
+                    ++_hit_rate.calls;
+                    ++_hit_rate.hits;
+                }
                 return _underlying_lru_cache.operator()(k);
+            }
+            else {
+                std::lock_guard<std::mutex> guard(_hit_rate_mutex);
+                ++_hit_rate.calls;
             }
         }
 
@@ -90,6 +99,10 @@ public:
             if (_underlying_lru_cache.has(k)) {
                 const value_type v = _underlying_lru_cache.operator()(k);
                 done();
+
+                std::lock_guard<std::mutex> guard(_hit_rate_mutex);
+                ++_hit_rate.late_hits;
+
                 return v;
             }
         }
@@ -110,6 +123,17 @@ public:
     // NOTE: not thread-safe at the moment! (for perf reasons)
     bool has(const key_type& k) const {
         return _underlying_lru_cache.has(k);
+    }
+
+    struct hit_rate {
+        size_t calls = 0;
+        size_t hits = 0;
+        size_t late_hits = 0;
+    };
+
+    hit_rate get_hit_rate() const {
+        std::lock_guard<std::mutex> guard(_hit_rate_mutex);
+        return _hit_rate;
     }
 
 private:
@@ -139,6 +163,10 @@ private:
 
     // This mutex guards the _is_being_evaluated object
     std::mutex _is_being_evaluated_mutex;
+
+    hit_rate _hit_rate;
+
+    mutable std::mutex _hit_rate_mutex;
 };
 
 #endif // _shared_lru_cache_using_std_
