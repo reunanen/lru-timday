@@ -136,6 +136,13 @@ public:
         return _hit_rate;
     }
 
+    void reset_hit_rate() {
+        std::lock_guard<std::mutex> guard(_hit_rate_mutex);
+        _hit_rate.calls = 0;
+        _hit_rate.hits = 0;
+        _hit_rate.late_hits = 0;
+    }
+
 private:
 
     typedef lru_cache_using_std<key_type, value_type, MAP> lru_cache_type;
