@@ -125,6 +125,14 @@ public:
         return _underlying_lru_cache.has(k);
     }
 
+    // It is sometimes convenient to be able to set a pre-calculated
+    // value, instead of even having to invoke the function
+    void set(const key_type& k, const value_type& v) {
+        std::lock_guard<std::mutex> guard(_underlying_lru_cache_mutex);
+        assert(!_underlying_lru_cache.has(k)); // logically, it shouldn't really exist yet
+        _underlying_lru_cache.set(k, v);
+    }
+
     struct hit_rate {
         size_t calls = 0;
         size_t hits = 0;
