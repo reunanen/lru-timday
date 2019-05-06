@@ -119,18 +119,24 @@ public:
         return v;
     }
 
-    // Find out if the cache already has some value
-    // NOTE: not thread-safe at the moment! (for perf reasons)
-    bool has(const key_type& k) const {
-        return _underlying_lru_cache.has(k);
-    }
-
     // It is sometimes convenient to be able to set a pre-calculated
     // value, instead of even having to invoke the function
     void set(const key_type& k, const value_type& v) {
         std::lock_guard<std::mutex> guard(_underlying_lru_cache_mutex);
         assert(!_underlying_lru_cache.has(k)); // logically, it shouldn't really exist yet
         _underlying_lru_cache.set(k, v);
+    }
+
+    // It is sometimes convenient to be able to free memory, when you
+    // know that the item won't be needed any longer
+    void evict(const key_type& k) {
+        std::lock_guard<std::mutex> guard(_underlying_lru_cache_mutex);
+        _underlying_lru_cache.evict(k);
+    }
+
+    bool is_full() const {
+        std::lock_guard<std::mutex> guard(_underlying_lru_cache_mutex);
+        return _underlying_lru_cache.is_full();
     }
 
     struct hit_rate {
@@ -159,10 +165,16 @@ private:
     lru_cache_type _underlying_lru_cache;
 
     // This mutex guards the underlying LRU cache
-    std::mutex _underlying_lru_cache_mutex;
+    mutable std::mutex _underlying_lru_cache_mutex;
 
     // The function to be cached 
     const function_type _fn;
+
+    // Find out if the cache already has some value
+    // NOTE: not thread-safe at the moment! (for perf reasons)
+    bool has(const key_type& k) const {
+        return _underlying_lru_cache.has(k);
+    }
 
     struct is_being_evaluated {
         std::shared_ptr<std::mutex> mutex;

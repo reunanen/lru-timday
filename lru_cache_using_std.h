@@ -158,6 +158,27 @@ public:
         }
     }
 
+    // It is sometimes convenient to be able to free memory, when you
+    // know that the item won't be needed any longer
+    void evict(const key_type& key) {
+
+        // Let's see if the item exists
+        const typename key_to_value_type::iterator it = _key_to_value.find(key);
+
+        if (it != _key_to_value.end()) {
+            // Erase both elements to completely purge record 
+            _key_to_value.erase(it);
+
+            const auto it2 = std::find(_key_tracker.begin(), _key_tracker.end(), key);
+            assert(it2 != _key_tracker.end());
+            _key_tracker.erase(it2);
+        }
+    }
+
+    bool is_full() const {
+        return _key_to_value.size() >= _capacity;
+    }
+
 private:
 
     // Record a fresh key-value pair in the cache 
@@ -167,7 +188,7 @@ private:
         assert(_key_to_value.find(k) == _key_to_value.end());
 
         // Make space if necessary 
-        if (_key_to_value.size() == _capacity)
+        if (is_full())
             evict();
 
         // Record k as most-recently-used key 
