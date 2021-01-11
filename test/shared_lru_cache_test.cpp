@@ -22,7 +22,7 @@ uint64_t fibonacci(int x)
 uint64_t repeated_fibonacci(int x)
 {
     // spend some time here first...
-#ifdef _DEBUG
+#ifndef NDEBUG
     const int repeat_count = 100;
 #else
     const int repeat_count = 1000000;
