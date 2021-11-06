@@ -129,9 +129,9 @@ public:
 
     // It is sometimes convenient to be able to free memory, when you
     // know that the item won't be needed any longer
-    void evict(const key_type& k) {
+    std::unique_ptr<value_type> evict(const key_type& k) {
         std::lock_guard<std::mutex> guard(_underlying_lru_cache_mutex);
-        _underlying_lru_cache.evict(k);
+        return _underlying_lru_cache.evict(k);
     }
 
     bool is_full() const {

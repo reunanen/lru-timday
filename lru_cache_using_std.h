@@ -160,18 +160,25 @@ public:
 
     // It is sometimes convenient to be able to free memory, when you
     // know that the item won't be needed any longer
-    void evict(const key_type& key) {
+    std::unique_ptr<value_type> evict(const key_type& key) {
 
         // Let's see if the item exists
         const typename key_to_value_type::iterator it = _key_to_value.find(key);
 
         if (it != _key_to_value.end()) {
+            std::unique_ptr<value_type> value = std::make_unique<value_type>(std::move(it->second.first));
+
             // Erase both elements to completely purge record 
             _key_to_value.erase(it);
 
             const auto it2 = std::find(_key_tracker.begin(), _key_tracker.end(), key);
             assert(it2 != _key_tracker.end());
             _key_tracker.erase(it2);
+
+            return value;
+        }
+        else {
+            return std::unique_ptr<value_type>();
         }
     }
 
