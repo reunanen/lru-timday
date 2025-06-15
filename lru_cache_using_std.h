@@ -158,6 +158,10 @@ public:
         }
     }
 
+    bool is_full() const {
+        return _key_to_value.size() == _capacity;
+    }
+
 private:
 
     // Record a fresh key-value pair in the cache 
@@ -167,7 +171,7 @@ private:
         assert(_key_to_value.find(k) == _key_to_value.end());
 
         // Make space if necessary 
-        if (_key_to_value.size() == _capacity)
+        if (is_full())
             evict();
 
         // Record k as most-recently-used key 
